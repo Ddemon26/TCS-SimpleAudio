@@ -1,0 +1,14 @@
+{
+    "name": "TCS.SimpleAudio",
+    "rootNamespace": "TCS.SimpleAudio",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
