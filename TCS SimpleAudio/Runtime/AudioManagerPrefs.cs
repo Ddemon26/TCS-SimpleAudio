@@ -11,6 +11,7 @@ namespace TCS.SimpleAudio {
         const string K_MENU_MUSIC_VOLUME_KEY = "MenuMusicVolume";
         const string K_GAME_SOUNDS_VOLUME_KEY = "GameSoundsVolume";
         const string K_VOICE_VOLUME_KEY = "VoicesVolume";
+        const string K_SPEAKER_MODE_KEY = "SpeakerMode";
         
         //const string K_CLIENT_GUID_KEY = "client_guid";
 
@@ -19,6 +20,9 @@ namespace TCS.SimpleAudio {
         const float K_DEFAULT_MENU_MUSIC_VOLUME = 0.5f;
         const float K_DEFAULT_GAME_SOUNDS_VOLUME = 0.5f;
         const float K_DEFAULT_VOICE_VOLUME = 0.5f;
+        
+        public AudioSpeakerMode GetSpeakerMode() => (AudioSpeakerMode)PlayerPrefs.GetInt(K_SPEAKER_MODE_KEY, (int)AudioSpeakerMode.Stereo);
+        public void SetSpeakerMode(AudioSpeakerMode mode) => PlayerPrefs.SetInt(K_SPEAKER_MODE_KEY, (int)mode);
 
         public float GetMasterVolume() => PlayerPrefs.GetFloat(K_MASTER_VOLUME_KEY, K_DEFAULT_MASTER_VOLUME);
         public void SetMasterVolume(float volume) => PlayerPrefs.SetFloat(K_MASTER_VOLUME_KEY, volume);

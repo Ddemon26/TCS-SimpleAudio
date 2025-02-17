@@ -7,7 +7,7 @@ using UnityEngine.Audio;
 namespace TCS.SimpleAudio {
     [DefaultExecutionOrder(-100)]
     public class SimpleAudioManager : MonoBehaviour {
-        #region Simple Singleton
+        /*#region Simple Singleton
         static SimpleAudioManager s_instance;
         void InitializeSingleton() {
             if (!Application.isPlaying) return;
@@ -25,7 +25,7 @@ namespace TCS.SimpleAudio {
                 }
             }
         }
-        #endregion
+        #endregion*/
 
         [Header("Audio Mixer Reference")]
         [SerializeField, HideInInspector] AudioMixer m_mixer;
@@ -68,7 +68,7 @@ namespace TCS.SimpleAudio {
 
         void Awake() {
             Volumes = new AudioVolumes(m_mixer);
-            InitializeSingleton();
+            //InitializeSingleton();
 
             // Initialize track indices
             m_musicClipIndex = 0;
@@ -249,6 +249,7 @@ namespace TCS.SimpleAudio {
             m_mixer = mixer;
         }
 
+        // Old Version on handling the audio mixer
         /*public void SetFloatByType(AudioType type, float value) {
             switch (type) {
                 case AudioType.Master:
@@ -329,6 +330,7 @@ namespace TCS.SimpleAudio {
             return Mathf.Log10(volume) * K_VOLUME_LOG10_MULTIPLIER;
         }*/
         
+        // New Version on handling the audio mixer
         readonly Dictionary<AudioType, string> m_audioTypeToString = new() {
             { AudioType.Master, MASTER },
             { AudioType.Music, MUSIC },
@@ -389,19 +391,15 @@ namespace TCS.SimpleAudio {
             MenuMusic = m_prefs.GetMenuMusicVolume();
             GameSounds = m_prefs.GetGameSoundsVolume();
             Voices = m_prefs.GetVoiceVolume();
+            
+            SetSpeakerMode((int)m_prefs.GetSpeakerMode());
 
             m_settings = AudioSettings.GetConfiguration();
         }
-        
-        // public void SetSpeakerMode(int mode) {  
-        //     m_settings.speakerMode = (AudioSpeakerMode)Enum.ToObject(typeof(AudioSpeakerMode), mode);
-        //     AudioSettings.Reset(m_settings);
-        //     Debug.Log($"Set speaker mode to {m_settings.speakerMode}");
-        // }
-        
-        public void SetSpeakerMode(int mode)
-        {
-            // Convert from int to enum
+
+        // We choose to use int instead of passing enums, is because we are not locking ourselves to a fixed enum type.
+        // So in theory, we can pass any int value, and it will be converted to the correct enum type.
+        public void SetSpeakerMode(int mode) {
             var speakerMode = mode switch {
                 0 => AudioSpeakerMode.Stereo,
                 1 => AudioSpeakerMode.Mono,
@@ -410,7 +408,7 @@ namespace TCS.SimpleAudio {
                 4 => AudioSpeakerMode.Surround,
                 5 => AudioSpeakerMode.Mode5point1,
                 6 => AudioSpeakerMode.Mode7point1,
-                7 => AudioSpeakerMode.Stereo,
+                7 => AudioSpeakerMode.Stereo, // for some reason 7 (Prologic) throws an error, find out why sometime.
                 _ => AudioSpeakerMode.Stereo,
             };
 
@@ -459,6 +457,8 @@ namespace TCS.SimpleAudio {
             m_prefs.SetMenuMusicVolume(MenuMusic);
             m_prefs.SetGameSoundsVolume(GameSounds);
             m_prefs.SetVoiceVolume(Voices);
+            
+            m_prefs.SetSpeakerMode(GetSpeakerMode());
         }
 
         public void ResetByType(AudioType type) => m_mixerGroups.ClearFloatsByType(type);

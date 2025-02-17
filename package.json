@@ -1,6 +1,6 @@
 {
-  "name": "com.tcs.audiomanager",
-  "displayName": "TCS-AudioManager",
+  "name": "com.tcs.simpleaudio",
+  "displayName": "TCS-SimpleAudio",
   "description": "A simple audio manager for Unity",
   "version": "1.0.1",
   "keywords": ["audio", "manager", "unity", "simple"],
@@ -8,7 +8,7 @@
   "dependencies": {},
   "author": {
     "name": "Damon Fedorick",
-    "url": "https://github.com/Ddemon26/TCS-AudioManager"
+    "url": "https://github.com/Ddemon26/TCS-SimpleAudio"
   },
-  "documentationUrl": "https://github.com/Ddemon26/TCS-AudioManager/blob/main/README.md"
+  "documentationUrl": "https://github.com/Ddemon26/TCS-SimpleAudio/blob/main/README.md"
 }
