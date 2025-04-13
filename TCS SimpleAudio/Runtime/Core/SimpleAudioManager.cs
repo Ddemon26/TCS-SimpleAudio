@@ -2,31 +2,11 @@
 using TCS.AudioManager;
 using UnityEngine;
 using UnityEngine.Audio;
-
 namespace TCS.SimpleAudio {
     [DefaultExecutionOrder(-100)]
     public class SimpleAudioManager : MonoBehaviour {
-        #region Simple Singleton
-        static SimpleAudioManager s_instance;
-        void InitializeSingleton() {
-            if (!Application.isPlaying) return;
-
-            // Detach from parent
-            transform.SetParent(null);
-
-            if (!s_instance) {
-                s_instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
-            else {
-                if (s_instance != this) {
-                    Destroy(gameObject);
-                }
-            }
-        }
-        #endregion
         [Header("Audio Mixer Reference")]
-        [SerializeField, HideInInspector] AudioMixer m_mixer;
+        [SerializeField] [HideInInspector] AudioMixer m_mixer;
 
         [Header("Music Clips")]
         [SerializeField] SoundClips m_musicClips;
@@ -35,10 +15,11 @@ namespace TCS.SimpleAudio {
         [Header("Audio Sources")]
         [SerializeField] AudioSource m_musicSource;
         [SerializeField] AudioSource m_menuMusicSource;
+        [SerializeField] AudioListener m_mainMenuAudioListener;
 
         [Header("Fade Durations")]
-        [SerializeField] float m_fadeInTime = 2.0f;   // Duration for fading in
-        [SerializeField] float m_fadeOutTime = 2.0f;  // Duration for fading out
+        [SerializeField] float m_fadeInTime = 2.0f; // Duration for fading in
+        [SerializeField] float m_fadeOutTime = 2.0f; // Duration for fading out
 
         [Header("Automatic Track Transition")]
         [Tooltip("If a track has <= this amount of time left, the manager will begin switching to the next track.")]
@@ -63,12 +44,12 @@ namespace TCS.SimpleAudio {
         public AudioVolumes Volumes { get; private set; }
 
         void Awake() {
-            InitializeSingleton();
+            //InitializeSingleton();
             Volumes = new AudioVolumes(m_mixer);
 
             // Initialize track indices
             m_musicClipIndex = 0;
-            m_menuMusicClipIndex = UnityEngine.Random.Range(0, m_menuMusicClips.m_clips.Length);
+            m_menuMusicClipIndex = Random.Range(0, m_menuMusicClips.m_clips.Length);
 
             // Assume menu is active initially
             IsMenuOpen = true;
@@ -94,6 +75,7 @@ namespace TCS.SimpleAudio {
         }
 
         void Update() {
+            // TODO: Refactor into a message system or event system to handle menu state changes.
             // Handle automatic track transitions for both sources
             HandleMenuTrackTransition();
             HandleGameTrackTransition();
@@ -104,11 +86,17 @@ namespace TCS.SimpleAudio {
                 m_previousIsMenuOpen = IsMenuOpen;
             }
         }
+        
+        public void ToggleAudioListener(bool isEnabled) {
+            if (m_mainMenuAudioListener != null) {
+                m_mainMenuAudioListener.enabled = isEnabled;
+            }
+        }
 
         #region Automatic Track Transitions
         void HandleGameTrackTransition() {
             if (!IsMenuOpen && m_musicSource.clip != null && !m_isSwitchingMusicTrack) {
-                if ((m_musicSource.clip.length - m_musicSource.time) <= m_trackTransitionThreshold) {
+                if (m_musicSource.clip.length - m_musicSource.time <= m_trackTransitionThreshold) {
                     StartCoroutine(FadeOutAndSwitchMusic());
                 }
             }
@@ -116,7 +104,7 @@ namespace TCS.SimpleAudio {
 
         void HandleMenuTrackTransition() {
             if (IsMenuOpen && m_menuMusicSource.clip != null && !m_isSwitchingMenuTrack) {
-                if ((m_menuMusicSource.clip.length - m_menuMusicSource.time) <= m_trackTransitionThreshold) {
+                if (m_menuMusicSource.clip.length - m_menuMusicSource.time <= m_trackTransitionThreshold) {
                     StartCoroutine(FadeOutAndSwitchMenu());
                 }
             }
@@ -151,8 +139,8 @@ namespace TCS.SimpleAudio {
             m_isFadingBetweenSources = true;
 
             // Decide which source to fade out and which to fade in.
-            AudioSource fadingOutSource = fadeToMenu ? m_musicSource : m_menuMusicSource;
-            AudioSource fadingInSource = fadeToMenu ? m_menuMusicSource : m_musicSource;
+            var fadingOutSource = fadeToMenu ? m_musicSource : m_menuMusicSource;
+            var fadingInSource = fadeToMenu ? m_menuMusicSource : m_musicSource;
 
             yield return StartCoroutine(CrossFadeOut(fadingOutSource, m_fadeOutTime));
             yield return StartCoroutine(CrossFadeIn(fadingInSource, m_fadeInTime));
@@ -168,6 +156,7 @@ namespace TCS.SimpleAudio {
                 audioSource.volume -= startVolume * (Time.deltaTime / fadeTime);
                 yield return null;
             }
+
             audioSource.volume = 0f;
         }
 
@@ -177,6 +166,7 @@ namespace TCS.SimpleAudio {
                 audioSource.volume += targetVolume * (Time.deltaTime / fadeTime);
                 yield return null;
             }
+
             audioSource.volume = targetVolume;
         }
         #endregion
